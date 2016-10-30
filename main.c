@@ -64,13 +64,15 @@ int main (int argc, char** argv)
   sem_init (&read_access, 0, 1);
 
   printf("Semaphores initialized\n"); 
-
-  char* rwqueue  = argv[1];
+  
+  char* rwqueue;
+  if (argc > 1) rwqueue  = argv[1];
   int len = strlen (rwqueue);
 
   pthread_t threads[len];
   
   int i;
+
   for (i = 0; i < len; i++)
   {
     if (rwqueue[i] == 'R')
