@@ -61,13 +61,14 @@ int main (int argc, char** argv)
   sem_init (&queue, 0, 1);
   sem_init (&read_access, 0, 1);
   
-
-  char* rwqueue  = argv[1];
+  char* rwqueue;
+  if (argc > 1) rwqueue  = argv[1];
   int len = strlen (rwqueue);
 
   pthread_t threads[len];
   
   int i;
+
   for (i = 0; i < len; i++)
   {
     if (rwqueue[i] == 'R') pthread_create (&threads[i], NULL, &reader, NULL);
