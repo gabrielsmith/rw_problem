@@ -14,34 +14,31 @@ sem_t queue;                            // queue of requests
 sem_t read_access;                      // access to readers counter var
 
 
-void write_op ()
+void write_op (int id)
 {
+  printf("Executing write operation of thread of id %d\n", id);
   data++;
 }
 
 
-void read_op ()
+void read_op (int id)
 {
-    printf("Data: %d\n", data);
+  printf("Reader of id %d reading data: %d\n", id, data);
 }
 
 void* writer (void *arg)
 {
-  printf("writer of id %d\n", *(int*)arg);
-
   sem_wait (&queue);                    // enters queue
   sem_wait (&res_access);               // requests access to the resorce
   sem_post (&queue);                    // leaves queue
 
-  write_op ();                          // executes write operation
+  write_op (*(int*)arg);                // executes write operation
   
   sem_post (&res_access);               // frees the resource to the next in queue
 }
 
 void* reader (void *arg)
 {
-  printf("reader of id %d\n", *(int*)arg);
-
   sem_wait (&queue);                    // enters queue
   sem_wait (&read_access);              // requests access to readers counter
   
@@ -51,7 +48,7 @@ void* reader (void *arg)
   sem_post (&queue);                    // leaves queue
   sem_post (&read_access);              // frees the readers var to the next reader
 
-  read_op ();                           // executes read operation
+  read_op (*(int*)arg);                 // executes read operation
 
   sem_wait (&read_access);              // requests access to the readers var again
   readers--;
@@ -76,20 +73,22 @@ int main (int argc, char** argv)
   int len = strlen (rwqueue);
 
   pthread_t threads[len];
-  
+  int id[len];
+
   int i;
   for (i = 0; i < len; i++)
   {
+    id[i] = i;
     if (rwqueue[i] == 'R')
     {
       printf ("Created reader of id %d\n", i);
-      pthread_create (&threads[i], NULL, &reader, (void*)&i);
+      pthread_create (&threads[i], NULL, &reader, (void*)&id[i]);
     }
 
     else if (rwqueue[i] == 'W')
     {
       printf("Created writer of id %d\n", i);
-      pthread_create (&threads[i], NULL, &writer, (void*)&i);
+      pthread_create (&threads[i], NULL, &writer, (void*)&id[i]);
     }
     else exit (1);
   }
