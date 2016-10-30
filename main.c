@@ -27,6 +27,8 @@ void read_op ()
 
 void* writer (void *arg)
 {
+  printf("writer of id %d\n", *(int*)arg);
+
   sem_wait (&queue);                    // enters queue
   sem_wait (&res_access);               // requests access to the resorce
   sem_post (&queue);                    // leaves queue
@@ -38,6 +40,8 @@ void* writer (void *arg)
 
 void* reader (void *arg)
 {
+  printf("reader of id %d\n", *(int*)arg);
+
   sem_wait (&queue);                    // enters queue
   sem_wait (&read_access);              // requests access to readers counter
   
@@ -67,24 +71,25 @@ int main (int argc, char** argv)
   
   char* rwqueue;
   if (argc > 1) rwqueue  = argv[1];
+  else exit (1);
+  
   int len = strlen (rwqueue);
 
   pthread_t threads[len];
   
   int i;
-
   for (i = 0; i < len; i++)
   {
     if (rwqueue[i] == 'R')
     {
-      pthread_create (&threads[i], NULL, &reader, NULL);
-      printf("Created reader of id %d\n", i);
+      printf ("Created reader of id %d\n", i);
+      pthread_create (&threads[i], NULL, &reader, (void*)&i);
     }
 
     else if (rwqueue[i] == 'W')
     {
-      pthread_create (&threads[i], NULL, &writer, NULL);
       printf("Created writer of id %d\n", i);
+      pthread_create (&threads[i], NULL, &writer, (void*)&i);
     }
     else exit (1);
   }
