@@ -25,7 +25,7 @@ void read_op ()
   printf("Data: %d", data);
 }
 
-void writer ()
+void* writer (void *arg)
 {
   sem_wait (&queue);                    // enters queue
   sem_wait (&res_access);               // requests access to the resorce
@@ -36,7 +36,7 @@ void writer ()
   sem_post (&res_access);               // frees the resource to the next in queue
 }
 
-void reader ()
+void* reader (void *arg)
 {
   sem_wait (&queue);                    // enters queue
   sem_wait (&read_access);              // requests access to readers counter
@@ -70,8 +70,8 @@ int main (int argc, char** argv)
   int i;
   for (i = 0; i < len; i++)
   {
-    if (rwqueue[i] == 'R') pthreads_create (&threads[i], NULL, reader, void);
-    else if (rwqueue[i] == 'W') pthreads_create (&threads[i], NULL, writer, void);
+    if (rwqueue[i] == 'R') pthread_create (&threads[i], NULL, &reader, NULL);
+    else if (rwqueue[i] == 'W') pthread_create (&threads[i], NULL, &writer, NULL);
     else exit (1);
   }
 
