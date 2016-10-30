@@ -22,7 +22,7 @@ void write_op ()
 
 void read_op ()
 {
-  printf("Data: %d", data);
+    printf("Data: %d\n", data);
 }
 
 void* writer (void *arg)
@@ -57,10 +57,13 @@ void* reader (void *arg)
 
 int main (int argc, char** argv)
 {
+  printf("\nMain started\n");
+
   sem_init (&res_access, 0, 1);
   sem_init (&queue, 0, 1);
   sem_init (&read_access, 0, 1);
-  
+
+  printf("Semaphores initialized\n"); 
 
   char* rwqueue  = argv[1];
   int len = strlen (rwqueue);
@@ -70,8 +73,17 @@ int main (int argc, char** argv)
   int i;
   for (i = 0; i < len; i++)
   {
-    if (rwqueue[i] == 'R') pthread_create (&threads[i], NULL, &reader, NULL);
-    else if (rwqueue[i] == 'W') pthread_create (&threads[i], NULL, &writer, NULL);
+    if (rwqueue[i] == 'R')
+    {
+      pthread_create (&threads[i], NULL, &reader, NULL);
+      printf("Created reader of id %d\n", i);
+    }
+
+    else if (rwqueue[i] == 'W')
+    {
+      pthread_create (&threads[i], NULL, &writer, NULL);
+      printf("Created writer of id %d\n", i);
+    }
     else exit (1);
   }
 
