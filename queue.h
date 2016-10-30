@@ -1,6 +1,5 @@
 typedef struct queue
 {
-  int id;
   struct node* first;
   struct node* last;
 }queue_t;
