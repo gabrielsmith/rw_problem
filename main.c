@@ -4,7 +4,8 @@
 #include <semaphore.h>                  // POSIX semaphores
 #include <string.h>                     // string manipulation
 
-
+int* queue_ids;                         // holds the ids of the threads in queue (DEBUGGING)
+int last_pos = 0;                       // position of the last thread id in queue (DEBUGGING)
 
 int data = 0;                           // resource to be written to/read from
 int readers = 0;                        // number of threads reading the resource
@@ -12,23 +13,26 @@ int readers = 0;                        // number of threads reading the resourc
 sem_t res_access;                       // access to the resource (var data)
 sem_t queue;                            // queue of requests
 sem_t read_access;                      // access to readers counter var
-
+sem_t debug;                            // access to debugging variables
 
 void write_op (int id)
 {
-  printf("Executing write operation of thread of id %d\n", id);
+  printf ("--Executing write operation of thread of id %d\n", id);
   data++;
 }
 
 
 void read_op (int id)
 {
-  printf("Reader of id %d reading data: %d\n", id, data);
+  printf ("--Reader of id %d reading data: %d\n", id, data);
 }
 
 void* writer (void *arg)
 {
+  sem_wait (&debug);
+  queue_ids[last_pos++] = *(int*)arg;
   sem_wait (&queue);                    // enters queue
+  sem_post (&debug);
   sem_wait (&res_access);               // requests access to the resorce
   sem_post (&queue);                    // leaves queue
 
@@ -39,7 +43,10 @@ void* writer (void *arg)
 
 void* reader (void *arg)
 {
+  sem_wait (&debug);
+  queue_ids[last_pos++] = *(int*)arg;
   sem_wait (&queue);                    // enters queue
+  sem_post (&debug);
   sem_wait (&read_access);              // requests access to readers counter
   
   if (readers == 0) sem_wait (&res_access); // requests access to the readers
@@ -63,6 +70,7 @@ int main (int argc, char** argv)
   sem_init (&res_access, 0, 1);
   sem_init (&queue, 0, 1);
   sem_init (&read_access, 0, 1);
+  sem_init (&debug, 0, 1);
 
   printf("Semaphores initialized\n"); 
   
@@ -71,6 +79,9 @@ int main (int argc, char** argv)
   else exit (1);
   
   int len = strlen (rwqueue);
+
+  int q_ids[len];
+  queue_ids = q_ids;
 
   pthread_t threads[len];
   int id[len];
@@ -91,6 +102,11 @@ int main (int argc, char** argv)
       pthread_create (&threads[i], NULL, &writer, (void*)&id[i]);
     }
     else exit (1);
+  }
+  
+  for (i = 0; i < len; i++)
+  {
+    pthread_join (threads[i], NULL);
   }
 
   return 0;
