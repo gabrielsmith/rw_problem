@@ -109,5 +109,12 @@ int main (int argc, char** argv)
     pthread_join (threads[i], NULL);
   }
 
+  printf ("Id queue: ");
+  for (i = 0; i < len; i++)
+  {
+    printf ("%d ", queue_ids[i]);
+  }
+  printf("\n");
+
   return 0;
 }
