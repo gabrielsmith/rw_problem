@@ -92,13 +92,13 @@ int main (int argc, char** argv)
     id[i] = i;
     if (rwqueue[i] == 'R')
     {
-      printf ("Created reader of id %d\n", i);
+      //printf ("Created reader of id %d\n", i);
       pthread_create (&threads[i], NULL, &reader, (void*)&id[i]);
     }
 
     else if (rwqueue[i] == 'W')
     {
-      printf("Created writer of id %d\n", i);
+      //printf("Created writer of id %d\n", i);
       pthread_create (&threads[i], NULL, &writer, (void*)&id[i]);
     }
     else exit (1);
